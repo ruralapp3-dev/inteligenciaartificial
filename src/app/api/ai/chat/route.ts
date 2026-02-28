@@ -1,9 +1,36 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function POST(req: Request) {
-  const { message } = await req.json();
+  try {
+    const { message } = await req.json();
 
-  return NextResponse.json({
-    reply: "Assistente IA ativo. Mensagem recebida: " + message
-  });
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "Você é um especialista em agricultura e agronegócio.",
+        },
+        {
+          role: "user",
+          content: message,
+        },
+      ],
+    });
+
+    return NextResponse.json({
+      reply: completion.choices[0].message.content,
+    });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { reply: "Erro ao consultar a IA." },
+      { status: 500 }
+    );
+  }
 }
