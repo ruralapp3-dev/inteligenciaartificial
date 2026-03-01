@@ -4,6 +4,12 @@ export async function POST(req: Request) {
   try {
     const { message } = await req.json();
 
+    if (!process.env.HUGGINGFACE_API_KEY) {
+      return NextResponse.json({
+        reply: "Chave HUGGINGFACE_API_KEY não encontrada.",
+      });
+    }
+
     const response = await fetch(
       "https://router.huggingface.co/v1/chat/completions",
       {
@@ -13,10 +19,15 @@ export async function POST(req: Request) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "llama-3.1-8b-instruct",
+          model: "mistralai/Mistral-7B-Instruct-v0.3",
           messages: [
-            { role: "user", content: message }
+            {
+              role: "user",
+              content: message,
+            },
           ],
+          max_tokens: 500,
+          temperature: 0.7,
         }),
       }
     );
@@ -30,13 +41,14 @@ export async function POST(req: Request) {
     }
 
     const reply =
-      data?.choices?.[0]?.message?.content || "Sem resposta da IA.";
+      data?.choices?.[0]?.message?.content ||
+      "A IA não retornou resposta.";
 
     return NextResponse.json({ reply });
 
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({
-      reply: "Erro interno no servidor: " + String(error),
+      reply: "Erro interno no servidor: " + error.message,
     });
   }
 }
