@@ -5,7 +5,7 @@ export async function POST(req: Request) {
     const { message } = await req.json();
 
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
+      "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2",
       {
         method: "POST",
         headers: {
@@ -14,9 +14,6 @@ export async function POST(req: Request) {
         },
         body: JSON.stringify({
           inputs: message,
-          options: {
-            wait_for_model: true
-          }
         }),
       }
     );
@@ -25,7 +22,7 @@ export async function POST(req: Request) {
 
     if (data.error) {
       return NextResponse.json({
-        reply: "Erro da IA: " + data.error
+        reply: "Erro da IA: " + data.error,
       });
     }
 
@@ -38,7 +35,7 @@ export async function POST(req: Request) {
 
   } catch (error) {
     return NextResponse.json({
-      reply: "Erro interno no servidor."
+      reply: "Erro interno no servidor.",
     });
   }
 }
