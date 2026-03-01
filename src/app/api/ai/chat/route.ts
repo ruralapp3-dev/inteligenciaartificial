@@ -19,7 +19,7 @@ export async function POST(req: Request) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "meta-llama/llama-3-8b-instruct:free",
+          model: "openrouter/auto",
           messages: [
             { role: "user", content: message }
           ],
