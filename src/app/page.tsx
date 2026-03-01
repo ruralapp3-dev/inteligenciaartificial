@@ -1,8 +1,18 @@
-export default function Home() {
+import "./globals.css";
+
+export const metadata = {
+  title: "Rural App",
+  description: "Aurora Agro IA",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <main style={{padding:40}}>
-      <h1>IA Agrícola - Rural App</h1>
-      <p>Sistema SaaS com IA Preditiva, Clima, Memória e Multimodal.</p>
-    </main>
+    <html lang="pt-BR">
+      <body>{children}</body>
+    </html>
   );
 }
