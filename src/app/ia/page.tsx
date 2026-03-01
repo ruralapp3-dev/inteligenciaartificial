@@ -1,4 +1,25 @@
+"use client";
+import { useState } from "react";
+
 export default function IA() {
+  const [message, setMessage] = useState("");
+  const [response, setResponse] = useState("");
+
+  async function sendMessage() {
+    if (!message) return;
+
+    const res = await fetch("/api/ai/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message, history: [] }),
+    });
+
+    const data = await res.json();
+    setResponse(data.reply);
+  }
+
   return (
     <div
       style={{
@@ -14,7 +35,6 @@ export default function IA() {
         backgroundRepeat: "no-repeat",
       }}
     >
-      {/* Overlay escuro */}
       <div
         style={{
           position: "absolute",
@@ -23,7 +43,6 @@ export default function IA() {
         }}
       />
 
-      {/* Conteúdo */}
       <div
         style={{
           position: "relative",
@@ -33,47 +52,55 @@ export default function IA() {
           backgroundColor: "rgba(0,0,0,0.75)",
           padding: "40px",
           borderRadius: "20px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
           color: "white",
         }}
       >
-        <h1 style={{ fontSize: "32px", marginBottom: "10px", color: "#22c55e" }}>
+        <h1 style={{ fontSize: "28px", marginBottom: "10px", color: "#22c55e" }}>
           Aurora Agro
         </h1>
 
-        <p style={{ marginBottom: "20px", color: "#ccc" }}>
+        <p style={{ marginBottom: "20px" }}>
           IA estratégica para decisões inteligentes no campo
         </p>
 
         <input
           type="text"
           placeholder="Converse com a Aurora..."
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
           style={{
             width: "100%",
-            padding: "15px",
-            borderRadius: "10px",
-            border: "1px solid #555",
+            padding: "12px",
+            borderRadius: "8px",
+            border: "1px solid #444",
+            marginBottom: "15px",
             backgroundColor: "#111",
             color: "white",
-            marginBottom: "20px",
           }}
         />
 
         <button
+          onClick={sendMessage}
           style={{
             width: "100%",
-            padding: "15px",
-            borderRadius: "10px",
+            padding: "12px",
+            borderRadius: "8px",
             border: "none",
             backgroundColor: "#22c55e",
             color: "black",
             fontWeight: "bold",
             cursor: "pointer",
-            fontSize: "16px",
           }}
         >
-          Ativar Aurora
+          Enviar
         </button>
+
+        {response && (
+          <div style={{ marginTop: "20px", color: "#ddd" }}>
+            <strong>Resposta:</strong>
+            <p>{response}</p>
+          </div>
+        )}
       </div>
     </div>
   );
