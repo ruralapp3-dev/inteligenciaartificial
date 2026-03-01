@@ -4,22 +4,22 @@ export async function POST(req: Request) {
   try {
     const { message } = await req.json();
 
-    if (!process.env.OPENROUTER_API_KEY) {
+    if (!process.env.GROQ_API_KEY) {
       return NextResponse.json({
-        reply: "Chave OPENROUTER_API_KEY não encontrada.",
+        reply: "Chave GROQ_API_KEY não encontrada.",
       });
     }
 
     const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "openrouter/auto",
+          model: "llama-3.3-70b-versatile",
           messages: [
             { role: "user", content: message }
           ],
