@@ -36,25 +36,24 @@ export default function Aurora() {
       style={{
         minHeight: "100vh",
         position: "relative",
-        backgroundImage: "url('/background.jpg')", // coloque sua imagem em /public
+        backgroundImage: "url('/background.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundAttachment: "fixed",
         color: "white",
-        fontFamily: "sans-serif",
+        fontFamily: "Inter, sans-serif",
       }}
     >
-      {/* OVERLAY ESCURO */}
+      {/* OVERLAY */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          background: "rgba(0,0,0,0.75)",
-          backdropFilter: "blur(4px)",
+          background: "linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.85))",
+          backdropFilter: "blur(6px)",
         }}
       />
 
-      {/* CONTEÚDO */}
       <div style={{ position: "relative", zIndex: 2 }}>
 
         {/* NAVBAR */}
@@ -64,6 +63,8 @@ export default function Aurora() {
             justifyContent: "space-between",
             padding: "20px 40px",
             borderBottom: "1px solid rgba(255,255,255,0.05)",
+            alignItems: "center",
+            flexWrap: "wrap",
           }}
         >
           <Link href="/" style={{ textDecoration: "none" }}>
@@ -72,26 +73,15 @@ export default function Aurora() {
             </h2>
           </Link>
 
-          <div style={{ display: "flex", gap: "30px" }}>
-            <Link href="/dashboard" style={{ color: "#aaa", textDecoration: "none" }}>
-              Dashboard
-            </Link>
-
-            <Link href="/ia" style={{ color: "#6eff9c", textDecoration: "none" }}>
-              Aurora
-            </Link>
-
-            <Link href="/comunidade" style={{ color: "#aaa", textDecoration: "none" }}>
-              Comunidade
-            </Link>
-
-            <Link href="/perfil" style={{ color: "#aaa", textDecoration: "none" }}>
-              Perfil
-            </Link>
+          <div style={{ display: "flex", gap: "25px", flexWrap: "wrap" }}>
+            <Link href="/dashboard" style={navStyle}>Dashboard</Link>
+            <Link href="/ia" style={{ ...navStyle, color: "#6eff9c" }}>Aurora</Link>
+            <Link href="/comunidade" style={navStyle}>Comunidade</Link>
+            <Link href="/perfil" style={navStyle}>Perfil</Link>
           </div>
         </div>
 
-        {/* IA NO TOPO */}
+        {/* CONTAINER PRINCIPAL */}
         <div
           style={{
             maxWidth: "900px",
@@ -105,7 +95,7 @@ export default function Aurora() {
         >
           <h1
             style={{
-              fontSize: "28px",
+              fontSize: "32px",
               marginBottom: "10px",
               color: "#6eff9c",
             }}
@@ -113,7 +103,7 @@ export default function Aurora() {
             Aurora Agro
           </h1>
 
-          <p style={{ color: "#aaa", marginBottom: "25px" }}>
+          <p style={{ color: "#aaa", marginBottom: "30px" }}>
             IA estratégica para decisões inteligentes no campo
           </p>
 
@@ -132,6 +122,7 @@ export default function Aurora() {
               fontSize: "16px",
               resize: "none",
               outline: "none",
+              transition: "0.3s",
             }}
           />
 
@@ -150,6 +141,10 @@ export default function Aurora() {
               fontSize: "18px",
               fontWeight: "bold",
               cursor: "pointer",
+              transition: "0.3s",
+              boxShadow: loading
+                ? "none"
+                : "0 0 25px rgba(46,204,113,0.4)",
             }}
           >
             {loading ? "Aurora analisando..." : "Ativar Aurora"}
@@ -163,6 +158,7 @@ export default function Aurora() {
                 background: "rgba(0,0,0,0.5)",
                 borderRadius: "15px",
                 borderLeft: "5px solid #2ecc71",
+                animation: "fadeIn 0.4s ease-in-out",
               }}
             >
               <strong style={{ color: "#6eff9c" }}>
@@ -175,7 +171,7 @@ export default function Aurora() {
           )}
         </div>
 
-        {/* CARDS ABAIXO */}
+        {/* CARDS */}
         <div
           style={{
             display: "flex",
@@ -186,23 +182,8 @@ export default function Aurora() {
             marginBottom: "80px",
           }}
         >
-          {[
-            { title: "Cotação Soja", value: "R$ 157,00", extra: "+1.3%" },
-            { title: "Previsão Climática", value: "Chuva 20°C", extra: "2h" },
-            { title: "Simulação Lucro", value: "R$ 206.500", extra: "+8%" },
-            { title: "Alertas", value: "2 pendências", extra: "Verificar" },
-          ].map((card, i) => (
-            <div
-              key={i}
-              style={{
-                background: "rgba(255,255,255,0.05)",
-                padding: "25px",
-                borderRadius: "18px",
-                minWidth: "200px",
-                backdropFilter: "blur(20px)",
-                boxShadow: "0 0 20px rgba(46,204,113,0.1)",
-              }}
-            >
+          {cards.map((card, i) => (
+            <div key={i} style={cardStyle}>
               <h4 style={{ color: "#aaa" }}>{card.title}</h4>
               <h2 style={{ margin: "10px 0", color: "#6eff9c" }}>
                 {card.value}
@@ -213,8 +194,31 @@ export default function Aurora() {
             </div>
           ))}
         </div>
-
       </div>
     </div>
   );
 }
+
+const navStyle = {
+  color: "#aaa",
+  textDecoration: "none",
+  transition: "0.3s",
+};
+
+const cardStyle = {
+  background: "rgba(255,255,255,0.05)",
+  padding: "25px",
+  borderRadius: "18px",
+  minWidth: "200px",
+  backdropFilter: "blur(20px)",
+  boxShadow: "0 0 20px rgba(46,204,113,0.1)",
+  transition: "0.3s",
+  cursor: "pointer",
+};
+
+const cards = [
+  { title: "Cotação Soja", value: "R$ 157,00", extra: "+1.3%" },
+  { title: "Previsão Climática", value: "Chuva 20°C", extra: "2h" },
+  { title: "Simulação Lucro", value: "R$ 206.500", extra: "+8%" },
+  { title: "Alertas", value: "2 pendências", extra: "Verificar" },
+];
