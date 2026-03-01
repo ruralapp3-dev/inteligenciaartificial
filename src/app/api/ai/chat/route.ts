@@ -6,12 +6,12 @@ export async function POST(req: Request) {
 
     if (!process.env.HUGGINGFACE_API_KEY) {
       return NextResponse.json({
-        reply: "Chave da Hugging Face não encontrada."
+        reply: "Chave HUGGINGFACE_API_KEY não encontrada.",
       });
     }
 
     const response = await fetch(
-      "https://router.huggingface.co/hf-inference/models/google/flan-t5-large",
+      "https://router.huggingface.co/v1/chat/completions",
       {
         method: "POST",
         headers: {
@@ -19,7 +19,10 @@ export async function POST(req: Request) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          inputs: message,
+          model: "HuggingFaceH4/zephyr-7b-beta",
+          messages: [
+            { role: "user", content: message }
+          ],
         }),
       }
     );
@@ -32,7 +35,8 @@ export async function POST(req: Request) {
       });
     }
 
-    const reply = data[0]?.generated_text || "Sem resposta da IA.";
+    const reply =
+      data?.choices?.[0]?.message?.content || "Sem resposta da IA.";
 
     return NextResponse.json({ reply });
 
