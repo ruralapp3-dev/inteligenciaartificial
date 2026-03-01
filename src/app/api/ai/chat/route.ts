@@ -4,12 +4,6 @@ export async function POST(req: Request) {
   try {
     const { message } = await req.json();
 
-    if (!process.env.HUGGINGFACE_API_KEY) {
-      return NextResponse.json({
-        reply: "Chave HUGGINGFACE_API_KEY não encontrada.",
-      });
-    }
-
     const response = await fetch(
       "https://router.huggingface.co/v1/chat/completions",
       {
@@ -19,7 +13,7 @@ export async function POST(req: Request) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "HuggingFaceH4/zephyr-7b-beta",
+          model: "llama-3.1-8b-instruct",
           messages: [
             { role: "user", content: message }
           ],
