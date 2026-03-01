@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     }
 
     const response = await fetch(
-      "https://router.huggingface.co/v1/chat/completions",
+      "https://router.huggingface.co/v1/completions",
       {
         method: "POST",
         headers: {
@@ -20,14 +20,9 @@ export async function POST(req: Request) {
         },
         body: JSON.stringify({
           model: "mistralai/Mistral-7B-Instruct-v0.3",
-          messages: [
-            {
-              role: "user",
-              content: message,
-            },
-          ],
+          prompt: message,
           max_tokens: 500,
-          temperature: 0.7,
+          temperature: 0.7
         }),
       }
     );
@@ -41,8 +36,7 @@ export async function POST(req: Request) {
     }
 
     const reply =
-      data?.choices?.[0]?.message?.content ||
-      "A IA não retornou resposta.";
+      data?.choices?.[0]?.text || "A IA não retornou resposta.";
 
     return NextResponse.json({ reply });
 
