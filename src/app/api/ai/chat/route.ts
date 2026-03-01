@@ -5,7 +5,7 @@ export async function POST(req: Request) {
     const { message } = await req.json();
 
     const response = await fetch(
-      "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2",
+      "https://router.huggingface.co/hf-inference/models/HuggingFaceH4/zephyr-7b-beta",
       {
         method: "POST",
         headers: {
@@ -20,16 +20,18 @@ export async function POST(req: Request) {
 
     const data = await response.json();
 
-    if (data.error) {
+    console.log("HF RESPONSE:", data);
+
+    if (!response.ok) {
       return NextResponse.json({
-        reply: "Erro da IA: " + data.error,
+        reply: "Erro da IA: " + JSON.stringify(data),
       });
     }
 
     const reply =
       Array.isArray(data) && data[0]?.generated_text
         ? data[0].generated_text
-        : "Sem resposta da IA.";
+        : JSON.stringify(data);
 
     return NextResponse.json({ reply });
 
