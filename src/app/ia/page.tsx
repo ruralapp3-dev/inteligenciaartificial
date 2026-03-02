@@ -2,13 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-}
-
 export default function IA() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<
+    { role: string; content: string }[]
+  >([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -20,32 +17,36 @@ export default function IA() {
   async function sendMessage() {
     if (!input.trim()) return;
 
-    const newMessages = [
-      ...messages,
-      { role: "user", content: input },
-    ];
-
-    setMessages(newMessages);
+    const userMessage = { role: "user", content: input };
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
 
-    const res = await fetch("/api/ai/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message: input,
-        history: messages,
-      }),
-    });
+    try {
+      const res = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: input,
+        }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    setMessages([
-      ...newMessages,
-      { role: "assistant", content: data.reply },
-    ]);
+      const aiMessage = {
+        role: "assistant",
+        content: data.reply || "Erro ao obter resposta",
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Erro na conexão com a IA." },
+      ]);
+    }
 
     setLoading(false);
   }
@@ -70,8 +71,8 @@ export default function IA() {
               key={index}
               className={`p-4 rounded-xl max-w-[80%] ${
                 msg.role === "user"
-                  ? "bg-green-500 text-black self-end ml-auto"
-                  : "bg-gray-800 text-white self-start"
+                  ? "bg-green-500 text-black ml-auto"
+                  : "bg-gray-800 text-white"
               }`}
             >
               {msg.content}
@@ -79,7 +80,9 @@ export default function IA() {
           ))}
 
           {loading && (
-            <div className="text-gray-400">Aurora está pensando...</div>
+            <div className="text-gray-400">
+              Aurora está pensando...
+            </div>
           )}
 
           <div ref={bottomRef} />
