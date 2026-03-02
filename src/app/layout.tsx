@@ -1,18 +1,21 @@
-import type { Metadata } from "next";
+import "./globals.css";
+import { ReactNode } from "react";
 
-export const metadata: Metadata = {
-  title: "IA Agrícola",
-  description: "Sistema inteligente agrícola",
+export const metadata = {
+  title: "Aurora Agro",
+  description: "IA estratégica para o campo",
 };
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body className="bg-[#0B0F0D] text-white">
+        {children}
+      </body>
     </html>
   );
 }
