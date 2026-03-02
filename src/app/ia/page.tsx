@@ -1,15 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+}
 
 export default function IA() {
-  const [message, setMessage] = useState("");
-  const [response, setResponse] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   async function sendMessage() {
-    if (!message) return;
+    if (!input.trim()) return;
 
+    const newMessages = [
+      ...messages,
+      { role: "user", content: input },
+    ];
+
+    setMessages(newMessages);
+    setInput("");
     setLoading(true);
 
     const res = await fetch("/api/ai/chat", {
@@ -17,53 +34,73 @@ export default function IA() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ message, history: [] }),
+      body: JSON.stringify({
+        message: input,
+        history: messages,
+      }),
     });
 
     const data = await res.json();
-    setResponse(data.reply);
+
+    setMessages([
+      ...newMessages,
+      { role: "assistant", content: data.reply },
+    ]);
+
     setLoading(false);
   }
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-6 bg-cover bg-center"
+      className="min-h-screen flex flex-col items-center px-6 py-10 bg-cover bg-center"
       style={{
         backgroundImage: "url('/background.jpg')",
       }}
     >
       <div className="absolute inset-0 bg-black/60"></div>
 
-      <div className="relative z-10 w-full max-w-3xl bg-black/70 backdrop-blur-lg p-10 rounded-3xl shadow-2xl">
-        <h1 className="text-4xl font-bold text-green-400 mb-2">
+      <div className="relative z-10 w-full max-w-3xl bg-black/70 backdrop-blur-lg p-8 rounded-3xl shadow-2xl flex flex-col h-[80vh]">
+        <h1 className="text-3xl font-bold text-green-400 mb-4">
           Aurora Agro
         </h1>
 
-        <p className="text-gray-300 mb-6">
-          IA estratégica para decisões inteligentes no campo
-        </p>
+        <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-2">
+          {messages.map((msg, index) => (
+            <div
+              key={index}
+              className={`p-4 rounded-xl max-w-[80%] ${
+                msg.role === "user"
+                  ? "bg-green-500 text-black self-end ml-auto"
+                  : "bg-gray-800 text-white self-start"
+              }`}
+            >
+              {msg.content}
+            </div>
+          ))}
 
-        <input
-          type="text"
-          placeholder="Converse com a Aurora..."
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          className="w-full p-4 rounded-xl bg-black/80 text-white border border-gray-700 focus:outline-none focus:border-green-400 mb-4"
-        />
+          {loading && (
+            <div className="text-gray-400">Aurora está pensando...</div>
+          )}
 
-        <button
-          onClick={sendMessage}
-          className="w-full bg-green-500 hover:bg-green-600 text-black font-bold py-4 rounded-xl transition-all duration-300 shadow-lg"
-        >
-          {loading ? "Processando..." : "Ativar Aurora"}
-        </button>
+          <div ref={bottomRef} />
+        </div>
 
-        {response && (
-          <div className="mt-6 bg-black/60 p-4 rounded-xl text-gray-200">
-            <strong>Resposta:</strong>
-            <p className="mt-2">{response}</p>
-          </div>
-        )}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="Converse com a Aurora..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            className="flex-1 p-4 rounded-xl bg-black/80 text-white border border-gray-700 focus:outline-none focus:border-green-400"
+          />
+
+          <button
+            onClick={sendMessage}
+            className="bg-green-500 hover:bg-green-600 text-black font-bold px-6 rounded-xl transition-all duration-300"
+          >
+            Enviar
+          </button>
+        </div>
       </div>
     </div>
   );
