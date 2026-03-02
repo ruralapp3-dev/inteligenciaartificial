@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Mic } from "lucide-react";
-import { motion } from "framer-motion";
 
-const AuroraAgroTS: React.FC = () => {
-  const [active, setActive] = useState<boolean>(false);
+export default function IA() {
+  const [active, setActive] = useState(false);
   const [messages, setMessages] = useState<
     { role: string; content: string }[]
   >([]);
@@ -61,19 +60,6 @@ const AuroraAgroTS: React.FC = () => {
             Aurora <span className="text-[#63D471]">Agro</span>
           </h1>
         </div>
-
-        <nav className="hidden md:flex gap-8 text-sm text-gray-400">
-          <span className="hover:text-[#63D471] cursor-pointer transition">
-            Dashboard
-          </span>
-          <span className="hover:text-[#63D471] cursor-pointer transition">
-            Comunidade
-          </span>
-          <span className="text-[#63D471]">Aurora</span>
-          <span className="hover:text-[#63D471] cursor-pointer transition">
-            Perfil
-          </span>
-        </nav>
       </header>
 
       {/* MAIN */}
@@ -82,7 +68,7 @@ const AuroraAgroTS: React.FC = () => {
         {/* CHAT CENTRAL */}
         <div className="w-full max-w-3xl bg-[#121816] border border-[#1B2A24] rounded-3xl shadow-2xl flex flex-col h-[70vh]">
 
-          {/* CHAT MESSAGES */}
+          {/* MESSAGES */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {messages.length === 0 && (
               <div className="text-center text-gray-500 mt-10">
@@ -134,23 +120,15 @@ const AuroraAgroTS: React.FC = () => {
           </div>
         </div>
 
-        {/* VOICE CORE */}
+        {/* VOICE CORE VISUAL (SEM ANIMAÇÃO EXTERNA) */}
         <div className="mt-12 flex flex-col items-center">
-          <motion.div
-            animate={{ scale: active ? 1.08 : 1 }}
-            transition={{ duration: 0.3 }}
-            className="relative w-32 h-32 rounded-full flex items-center justify-center"
+          <div
+            className={`w-24 h-24 rounded-full flex items-center justify-center border-4 ${
+              active ? "border-[#63D471]" : "border-[#1B2A24]"
+            }`}
           >
-            <motion.div
-              animate={{ opacity: active ? 1 : 0.5 }}
-              transition={{ repeat: Infinity, duration: 1.6 }}
-              className="absolute w-full h-full rounded-full border-4 border-[#63D471] blur-xl"
-            />
-
-            <div className="w-20 h-20 rounded-full bg-[#121816] flex items-center justify-center border border-[#1B2A24]">
-              <Mic size={35} className="text-[#63D471]" />
-            </div>
-          </motion.div>
+            <Mic size={32} className="text-[#63D471]" />
+          </div>
 
           <button
             onClick={() => setActive(!active)}
@@ -162,6 +140,4 @@ const AuroraAgroTS: React.FC = () => {
       </main>
     </div>
   );
-};
-
-export default AuroraAgroTS;
+}
