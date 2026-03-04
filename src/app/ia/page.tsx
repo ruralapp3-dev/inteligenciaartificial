@@ -43,7 +43,7 @@ export default function IA() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Erro ao conectar com a IA." },
+        { role: "assistant", content: "Erro ao conectar com a Aurora." },
       ]);
     }
 
@@ -57,7 +57,7 @@ export default function IA() {
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#63D471] to-[#1B5E3B]" />
           <h1 className="text-2xl font-semibold tracking-wide">
-            Aurora <span className="text-[#63D471]">Agro</span>
+            Rural App <span className="text-[#63D471]">Aurora</span>
           </h1>
         </div>
       </header>
@@ -72,7 +72,7 @@ export default function IA() {
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {messages.length === 0 && (
               <div className="text-center text-gray-500 mt-10">
-                Converse com a Aurora para começar.
+                Converse com a <span className="text-[#63D471]">Aurora</span> para começar.
               </div>
             )}
 
@@ -102,7 +102,7 @@ export default function IA() {
           <div className="p-4 border-t border-[#1B2A24] flex gap-3">
             <input
               type="text"
-              placeholder="Digite sua pergunta..."
+              placeholder="Pergunte algo para a Aurora..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
@@ -120,7 +120,7 @@ export default function IA() {
           </div>
         </div>
 
-        {/* VOICE CORE VISUAL (SEM ANIMAÇÃO EXTERNA) */}
+        {/* VOICE VISUAL */}
         <div className="mt-12 flex flex-col items-center">
           <div
             className={`w-24 h-24 rounded-full flex items-center justify-center border-4 ${
