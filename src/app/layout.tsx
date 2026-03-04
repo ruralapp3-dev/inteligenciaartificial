@@ -2,8 +2,8 @@ import "./globals.css";
 import { ReactNode } from "react";
 
 export const metadata = {
-  title: "Aurora Agro",
-  description: "IA estratégica para o campo",
+  title: "Rural App",
+  description: "Rural App com Aurora - IA estratégica para o campo",
 };
 
 export default function RootLayout({
