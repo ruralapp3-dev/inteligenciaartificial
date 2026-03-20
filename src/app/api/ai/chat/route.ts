@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { message, history } = await req.json();
+    const { message, history = [], userId } = await req.json();
 
     if (!process.env.GROQ_API_KEY) {
       return NextResponse.json({
@@ -10,25 +10,50 @@ export async function POST(req: Request) {
       });
     }
 
-    const systemPrompt = `
-Você é Aurora Agro, uma especialista brasileira em agronegócio.
+    // 🧠 CONTROLE DE HISTÓRICO (evita custo alto e lentidão)
+    const limitedHistory = history.slice(-6);
 
-REGRAS:
-- Sempre responder em Português do Brasil.
-- Foco total em agronegócio.
-- Especialista em:
-  * Pragas agrícolas
-  * Manejo integrado
-  * Controle químico e biológico
-  * Planejamento de safra
-  * Custos por hectare
-  * Fluxo de caixa rural
-  * Precificação de commodities
-  * Mercado agrícola brasileiro
-  * Gestão estratégica rural
-- Dar respostas técnicas, claras e aplicáveis.
-- Sempre sugerir ação prática quando possível.
-- Falar de forma profissional, mas próxima do produtor.
+    // 🧠 DETECÇÃO INTELIGENTE (clima / mercado)
+    const lower = message.toLowerCase();
+
+    // 🌦️ CLIMA SIMPLES (mock inicial - depois conectamos API real)
+    if (lower.includes("clima") || lower.includes("chuva")) {
+      return NextResponse.json({
+        reply:
+          "🌦️ Para análise climática precisa, integrei previsão em breve. Por enquanto, recomendo verificar umidade do solo e radar local antes de qualquer aplicação.",
+      });
+    }
+
+    // 💰 MERCADO SIMPLES
+    if (
+      lower.includes("preço") ||
+      lower.includes("cotação") ||
+      lower.includes("mercado")
+    ) {
+      return NextResponse.json({
+        reply:
+          "📊 O mercado agrícola varia diariamente. Para café, soja e milho, recomendo acompanhar CEPEA ou bolsas. Posso integrar cotação automática no sistema se quiser.",
+      });
+    }
+
+    // 🧠 PROMPT PROFISSIONAL
+    const systemPrompt = `
+Você é Aurora Agro, uma especialista brasileira em agronegócio de alto nível.
+
+Seu comportamento:
+- Pensamento de engenheiro agrônomo experiente
+- Foco em produtividade e lucro
+- Linguagem simples e prática
+- Respostas diretas e acionáveis
+
+Ao responder:
+- Sempre que possível:
+  • Diga o problema
+  • Explique a causa
+  • Dê solução prática
+  • Sugira prevenção
+
+Contexto do Brasil agrícola.
 `;
 
     const response = await fetch(
@@ -43,11 +68,11 @@ REGRAS:
           model: "llama-3.3-70b-versatile",
           messages: [
             { role: "system", content: systemPrompt },
-            ...(history || []),
-            { role: "user", content: message }
+            ...limitedHistory,
+            { role: "user", content: message },
           ],
           temperature: 0.6,
-          max_tokens: 800
+          max_tokens: 800,
         }),
       }
     );
@@ -65,7 +90,6 @@ REGRAS:
       "Sem resposta da IA.";
 
     return NextResponse.json({ reply });
-
   } catch (error: any) {
     return NextResponse.json({
       reply: "Erro interno: " + error.message,
