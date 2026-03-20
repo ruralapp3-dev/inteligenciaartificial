@@ -4,140 +4,133 @@ import { useState, useEffect, useRef } from "react";
 import { Mic } from "lucide-react";
 
 export default function IA() {
-  const [active, setActive] = useState(false);
-  const [messages, setMessages] = useState<
-    { role: string; content: string }[]
-  >([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
 
+  // 🎤 VOZ
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
 
-  async function sendMessage() {
-    if (!input.trim()) return;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "pt-BR";
 
-    const userMessage = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
+      recognition.onresult = (e: any) => {
+        const text = e.results[0][0].transcript;
+        sendMessage(text);
+      };
+
+      recognitionRef.current = recognition;
+    }
+  }, []);
+
+  // 🔊 RESPOSTA EM ÁUDIO
+  function speak(text: string) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "pt-BR";
+    speechSynthesis.speak(utterance);
+  }
+
+  // 💬 CHAT
+  async function sendMessage(text?: string) {
+    const msg = text || input;
+    if (!msg) return;
+
+    setMessages((prev) => [...prev, { role: "user", content: msg }]);
     setInput("");
     setLoading(true);
 
-    try {
-      const res = await fetch("/api/ai/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: input }),
-      });
+    const res = await fetch("/api/ai/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: msg,
+        history: messages,
+        userId: "user-1",
+      }),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.reply },
-      ]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Erro ao conectar com a Aurora." },
-      ]);
-    }
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: data.reply },
+    ]);
 
+    speak(data.reply);
     setLoading(false);
   }
 
+  // 📸 IMAGEM
+  async function handleImage(e: any) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/ai/vision", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: data.analysis },
+    ]);
+  }
+
   return (
-    <div className="min-h-screen bg-[#0B0F0D] text-white flex flex-col">
-      {/* HEADER */}
-      <header className="w-full px-8 py-5 flex items-center justify-between border-b border-[#1B2A24]">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#63D471] to-[#1B5E3B]" />
-          <h1 className="text-2xl font-semibold tracking-wide">
-            Rural App <span className="text-[#63D471]">Aurora</span>
-          </h1>
-        </div>
-      </header>
+    <div className="min-h-screen bg-black text-white p-6">
+      <h1 className="text-xl mb-4">Aurora Agro 🌱</h1>
 
-      {/* MAIN */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-10">
+      {/* BOTÕES INTELIGENTES */}
+      <div className="flex gap-2 mb-4">
+        <button onClick={() => setInput("Como está o clima hoje?")}>🌦️ Clima</button>
+        <button onClick={() => setInput("Preço do café hoje")}>☕ Café</button>
+      </div>
 
-        {/* CHAT CENTRAL */}
-        <div className="w-full max-w-3xl bg-[#121816] border border-[#1B2A24] rounded-3xl shadow-2xl flex flex-col h-[70vh]">
-
-          {/* MESSAGES */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
-            {messages.length === 0 && (
-              <div className="text-center text-gray-500 mt-10">
-                Converse com a <span className="text-[#63D471]">Aurora</span> para começar.
-              </div>
-            )}
-
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`max-w-[75%] p-4 rounded-2xl text-sm ${
-                  msg.role === "user"
-                    ? "bg-[#63D471] text-black ml-auto"
-                    : "bg-[#1B2A24] text-white"
-                }`}
-              >
-                {msg.content}
-              </div>
-            ))}
-
-            {loading && (
-              <div className="text-gray-400 text-sm">
-                Aurora está analisando...
-              </div>
-            )}
-
-            <div ref={bottomRef} />
+      {/* CHAT */}
+      <div className="mb-4">
+        {messages.map((m, i) => (
+          <div key={i} className={m.role === "user" ? "text-right" : ""}>
+            <div className="bg-gray-800 p-2 rounded m-1 inline-block">
+              {m.content}
+            </div>
           </div>
+        ))}
+      </div>
 
-          {/* INPUT */}
-          <div className="p-4 border-t border-[#1B2A24] flex gap-3">
-            <input
-              type="text"
-              placeholder="Pergunte algo para a Aurora..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") sendMessage();
-              }}
-              className="flex-1 p-3 rounded-xl bg-[#0B0F0D] text-white border border-[#1B2A24] focus:outline-none focus:border-[#63D471]"
-            />
+      {loading && <p>🌱 Pensando...</p>}
 
-            <button
-              onClick={sendMessage}
-              className="px-6 py-2 rounded-xl bg-[#63D471] text-black font-semibold hover:scale-105 transition"
-            >
-              Enviar
-            </button>
-          </div>
-        </div>
+      {/* INPUT */}
+      <div className="flex gap-2">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          className="flex-1 p-2 text-black"
+        />
 
-        {/* VOICE VISUAL */}
-        <div className="mt-12 flex flex-col items-center">
-          <div
-            className={`w-24 h-24 rounded-full flex items-center justify-center border-4 ${
-              active ? "border-[#63D471]" : "border-[#1B2A24]"
-            }`}
-          >
-            <Mic size={32} className="text-[#63D471]" />
-          </div>
+        <button onClick={() => sendMessage()}>Enviar</button>
 
-          <button
-            onClick={() => setActive(!active)}
-            className="mt-4 text-sm text-gray-400 hover:text-[#63D471] transition"
-          >
-            {active ? "Desativar voz" : "Ativar modo voz"}
-          </button>
-        </div>
-      </main>
+        {/* 📸 */}
+        <input type="file" id="img" hidden onChange={handleImage} />
+        <label htmlFor="img" className="cursor-pointer">📷</label>
+
+        {/* 🎤 */}
+        <button onClick={() => recognitionRef.current?.start()}>
+          <Mic />
+        </button>
+      </div>
     </div>
   );
 }
