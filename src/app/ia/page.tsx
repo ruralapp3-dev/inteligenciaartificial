@@ -9,6 +9,7 @@ export default function IA() {
   const [loading, setLoading] = useState(false);
 
   const recognitionRef = useRef<any>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   // 🎤 VOZ
   useEffect(() => {
@@ -29,14 +30,22 @@ export default function IA() {
     }
   }, []);
 
-  // 🔊 RESPOSTA EM ÁUDIO
+  // 🔊 VOZ MELHORADA
   function speak(text: string) {
+    const voices = speechSynthesis.getVoices();
+
+    const voice =
+      voices.find((v) => v.lang === "pt-BR") ||
+      voices.find((v) => v.lang.includes("pt"));
+
     const utterance = new SpeechSynthesisUtterance(text);
+    utterance.voice = voice || null;
     utterance.lang = "pt-BR";
+    utterance.rate = 0.95;
+
     speechSynthesis.speak(utterance);
   }
 
-  // 💬 CHAT
   async function sendMessage(text?: string) {
     const msg = text || input;
     if (!msg) return;
@@ -68,7 +77,6 @@ export default function IA() {
     setLoading(false);
   }
 
-  // 📸 IMAGEM
   async function handleImage(e: any) {
     const file = e.target.files[0];
     if (!file) return;
@@ -90,45 +98,62 @@ export default function IA() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
-      <h1 className="text-xl mb-4">Aurora Agro 🌱</h1>
+    <div className="min-h-screen bg-[#0B0F0D] text-white flex flex-col">
 
-      {/* BOTÕES INTELIGENTES */}
-      <div className="flex gap-2 mb-4">
-        <button onClick={() => setInput("Como está o clima hoje?")}>🌦️ Clima</button>
-        <button onClick={() => setInput("Preço do café hoje")}>☕ Café</button>
-      </div>
+      {/* HEADER */}
+      <header className="p-4 border-b border-[#1B2A24]">
+        <h1 className="text-xl">
+          Rural App <span className="text-[#63D471]">Aurora</span>
+        </h1>
+      </header>
 
       {/* CHAT */}
-      <div className="mb-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.map((m, i) => (
-          <div key={i} className={m.role === "user" ? "text-right" : ""}>
-            <div className="bg-gray-800 p-2 rounded m-1 inline-block">
-              {m.content}
-            </div>
+          <div
+            key={i}
+            className={`max-w-[70%] p-3 rounded-xl ${
+              m.role === "user"
+                ? "bg-[#63D471] text-black ml-auto"
+                : "bg-[#1B2A24]"
+            }`}
+          >
+            {m.content}
           </div>
         ))}
+
+        {loading && <div className="text-gray-400">🌱 Pensando...</div>}
+        <div ref={bottomRef} />
       </div>
 
-      {loading && <p>🌱 Pensando...</p>}
-
       {/* INPUT */}
-      <div className="flex gap-2">
+      <div className="p-4 border-t border-[#1B2A24] flex gap-2">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          className="flex-1 p-2 text-black"
+          className="flex-1 p-3 rounded-xl bg-black border border-[#1B2A24]"
+          placeholder="Pergunte algo..."
         />
 
-        <button onClick={() => sendMessage()}>Enviar</button>
-
-        {/* 📸 */}
+        {/* 📷 */}
         <input type="file" id="img" hidden onChange={handleImage} />
-        <label htmlFor="img" className="cursor-pointer">📷</label>
+        <label htmlFor="img" className="cursor-pointer px-3">📷</label>
 
-        {/* 🎤 */}
-        <button onClick={() => recognitionRef.current?.start()}>
-          <Mic />
+        <button
+          onClick={() => sendMessage()}
+          className="bg-[#63D471] px-4 rounded-xl text-black"
+        >
+          Enviar
+        </button>
+      </div>
+
+      {/* 🎤 VOZ */}
+      <div className="p-4 flex justify-center">
+        <button
+          onClick={() => recognitionRef.current?.start()}
+          className="w-16 h-16 rounded-full border-2 border-[#63D471] flex items-center justify-center"
+        >
+          <Mic className="text-[#63D471]" />
         </button>
       </div>
     </div>
